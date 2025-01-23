@@ -1,11 +1,10 @@
 import { describe, it, expect } from 'vitest'
-
+import HomeView from '@/views/HomeView.vue'
 import { mount } from '@vue/test-utils'
-import HelloWorld from '../HelloWorld.vue'
 
-describe('HelloWorld', () => {
+describe('HomeView', () => {
   it('renders properly', () => {
-    const wrapper = mount(HelloWorld, { props: { msg: 'Hello Vitest' } })
-    expect(wrapper.text()).toContain('Hello Vitest')
+    const wrapper = mount(HomeView)
+    expect(wrapper.html()).toMatchSnapshot()
   })
 })

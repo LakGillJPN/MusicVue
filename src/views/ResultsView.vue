@@ -45,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { ref, onMounted, computed } from 'vue'
 import { useSearchStore } from '../stores/searchStore'
 import SearchBar from '../components/SearchBar.vue'
@@ -53,28 +53,33 @@ import apiCall from '../api/apiCall.ts'
 import artistName from '../utils/artistName'
 import albumName from '../utils/albumName'
 import filterData from '../utils/filterData'
-import noImage from '../assets/noImage.vue'
 
-const route = useRoute()
+interface Result {
+  id: number
+  title: string
+  cover_image: string
+  year: number
+  release_date: string
+  master_id: number
+}
+
 const router = useRouter()
 const searchStore = useSearchStore()
-const results = computed(() => searchStore.results)
+
+const results = computed<Result[]>(() => searchStore.results as Result[]);
 const loading = ref(true)
 
-const image = (image: string) => {
-  image ? image : noImage
-}
 
 const fetchData = async (query: string) => {
   try {
     const result = await apiCall({ query })
-    let dataToFilter = Array.isArray(result) ? result : result.results
+    const dataToFilter = Array.isArray(result) ? result : result.results
     if (!Array.isArray(dataToFilter)) {
       console.error('Data to filter is not an array:', dataToFilter)
       return
     }
 
-    const filteredResults = filterData(dataToFilter)
+    const filteredResults: Result[] = filterData(dataToFilter)
     console.log('Filtered Results:', filteredResults)
 
     //searchStore.setResults(result)

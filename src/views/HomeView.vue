@@ -13,17 +13,25 @@ import { useRouter } from 'vue-router'
 import SearchBar from '../components/SearchBar.vue'
 import apiCall from '../api/apiCall.ts'
 import { useSearchStore } from '../stores/searchStore'
-//import fetchData from '../utils/fetchData
 import filterData from '../utils/filterData'
 
-const searchStore = useSearchStore()
+interface Result {
+  id: number
+  title: string
+  cover_image: string
+  year: number
+  release_date: string
+  master_id: number
+}
+
+const searchStore = useSearchStore() 
 const router = useRouter()
 
 const fetchData = async (query: string) => {
   try {
     const result = await apiCall({ query })
-    let dataToFilter = Array.isArray(result) ? result : result.results
-    const filteredResults = filterData(dataToFilter)
+    const dataToFilter = Array.isArray(result) ? result : result.results
+    const filteredResults: Result[] = filterData(dataToFilter)
     //searchStore.setResults(result)
     searchStore.setResults(filteredResults)
     router.push({ name: 'ResultsView' })

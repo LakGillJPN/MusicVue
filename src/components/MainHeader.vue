@@ -1,4 +1,5 @@
-<script setup></script>
+<script setup lang="ts">
+</script>
 
 <template>
   <header class="bg-white text-black py-4 px-6 shadow-md">
