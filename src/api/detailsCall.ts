@@ -1,20 +1,16 @@
 import axios from 'axios';
 
 interface ApiCallParams {
-  query: string;
+  master: number;
 }
 
 const consumerKey = import.meta.env.VITE_CONSUMER_KEY;
 const consumerSecret = import.meta.env.VITE_CONSUMER_SECRET;
 const userAgent = import.meta.env.VITE_USER_AGENT;
 
-
-const apiCall = async ({ query }: ApiCallParams) => {
+const detailsCall = async ({ master }: ApiCallParams) => {
   try {
-    console.log("QUERY", query)
-    console.log("import", import.meta.env)
-    console.log(consumerKey, consumerSecret, userAgent);
-    const apiURL = `https://api.discogs.com/database/search?format=album&artist=${query}`;
+    const apiURL = `https://api.discogs.com/database/masters/${master}`;
     const response = await axios.get(apiURL , {
         headers: {
             "User-Agent": `${userAgent}`,
@@ -28,4 +24,4 @@ const apiCall = async ({ query }: ApiCallParams) => {
   }
 };
 
-export default apiCall;
+export default detailsCall;
