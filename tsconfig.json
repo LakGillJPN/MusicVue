@@ -13,6 +13,6 @@
   ],
   "compilerOptions": {
     "module": "NodeNext",
-    "types": ["pinia-plugin-persistedstate"]
+    "types": ["node", "jest"]
   },
 }
