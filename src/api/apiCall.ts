@@ -11,9 +11,6 @@ const userAgent = import.meta.env.VITE_USER_AGENT;
 
 const apiCall = async ({ query }: ApiCallParams) => {
   try {
-    console.log("QUERY", query)
-    console.log("import", import.meta.env)
-    console.log(consumerKey, consumerSecret, userAgent);
     const apiURL = `https://api.discogs.com/database/search?format=album&artist=${query}`;
     const response = await axios.get(apiURL , {
         headers: {

@@ -11,7 +11,8 @@
         >
           <li v-for="(item, index) in results" :key="index">
             <div
-              class="w-[100%] flex flex-col justify-between items-center bg-white rounded-lg shadow-2xl"
+              class="w-[100%] flex flex-col justify-between items-center bg-white rounded-lg shadow-2xl cursor-pointer"
+              @click="goToDetails(item.master_id)"
             >
               <div class="flex w-100 h-80 justify-center items-center">
                 <img
@@ -69,6 +70,9 @@ const searchStore = useSearchStore()
 const results = computed<Result[]>(() => searchStore.results as Result[]);
 const loading = ref(true)
 
+const goToDetails = (masterId: number) => {
+  router.push({ name: 'DetailsView', params: { masterId} })
+}
 
 const fetchData = async (query: string) => {
   try {

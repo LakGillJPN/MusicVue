@@ -9,7 +9,6 @@
         <ul class="flex space-x-6">
           <li><a href="/" class="hover:text-gray-300">Home</a></li>
           <li><a href="/about" class="hover:text-gray-300">About</a></li>
-    
         </ul>
       </nav>
     </div>
