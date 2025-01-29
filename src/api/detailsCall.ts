@@ -10,7 +10,7 @@ const userAgent = import.meta.env.VITE_USER_AGENT;
 
 const detailsCall = async ({ master }: ApiCallParams) => {
   try {
-    const apiURL = `https://api.discogs.com/database/masters/${master}`;
+    const apiURL = `https://api.discogs.com/masters/${master}`;
     const response = await axios.get(apiURL , {
         headers: {
             "User-Agent": `${userAgent}`,
