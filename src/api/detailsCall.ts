@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 interface ApiCallParams {
-  master: number;
+  master: number | string;
 }
 
 const consumerKey = import.meta.env.VITE_CONSUMER_KEY;

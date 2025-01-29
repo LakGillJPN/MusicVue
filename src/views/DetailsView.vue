@@ -1,6 +1,7 @@
 <template>
   <main class="flex flex-col lg:flex-row justify-center mx-4 pt-10">
-    <div v-if="details" class="flex flex-col lg:flex-row gap-4 w-full">
+    <div v-if="loading">Loading details...</div>
+    <div v-else-if="details" class="flex flex-col lg:flex-row gap-4 w-full">
       <!-- Left Section: Image -->
       <div class="">
         <div class="flex w-full h-100 justify-center items-center">
@@ -96,6 +97,7 @@
 <script setup lang="ts">
 import { ref, onMounted, type Ref } from 'vue'
 import detailsCall from '@/api/detailsCall'
+import { useRoute, useRouter } from 'vue-router'
 import addZero from '../utils/addZero'
 
 interface Details {
@@ -107,19 +109,28 @@ interface Details {
   videos: { uri: string }[]
 }
 
+const route = useRoute()
+const router = useRouter()
+const masterId = ref<number | null>(null)
 const details: Ref<Details | null> = ref(null)
 const openDropdown = ref<number | null>(null)
+const loading = ref(true)
 
-const fetchData = async (master: number) => {
+const fetchDetails = async () => {
+  if (!masterId.value) return
+
   try {
-    const result = await detailsCall({ master })
-    console.log(result)
-
-    //searchStore.setResults(result)
+    const result = await detailsCall({ master: masterId.value })
     details.value = result
   } catch (error) {
-    console.error('Error fetching data:', error)
+    console.error('Error fetching details:', error)
+  } finally {
+    loading.value = false
   }
+}
+
+const goBack = () => {
+  router.push({ name: 'ResultsView' })
 }
 
 const toggleDropdown = (index: number) => {
@@ -127,8 +138,12 @@ const toggleDropdown = (index: number) => {
 }
 
 onMounted(() => {
-  const query = 73754 // Adjust this as needed
-  fetchData(query)
+  masterId.value = Number(route.params.masterId)
+  if (masterId.value) {
+    fetchDetails()
+  } else {
+    loading.value = false
+  }
 })
 </script>
 <style lang=""></style>
