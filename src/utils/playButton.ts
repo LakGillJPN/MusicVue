@@ -14,7 +14,7 @@ const playButton = (trackTitle: string, array: Details[]) => {
   console.log('MATCHEDVIDEO', matchedVideo)
 
   if (matchedVideo) {
-    return "../../public/play-button.png"
+    return "/play-button.png"
   }
 
   return undefined
