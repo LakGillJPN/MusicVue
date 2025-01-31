@@ -16,12 +16,13 @@
             >
               <div class="flex w-100 h-80 justify-center items-center">
                 <img
-                  v-if="item.cover_image !== 'https://st.discogs.com/c4d19cea99cdfcd895132e47983ad7ea43099b37/images/spacer.gif' "
+
+                  v-if="item.cover_image.slice(item.cover_image.length-10, item.cover_image.length) !== 'spacer.gif' "
                   class="h-full object-cover"
                   :src="item.cover_image"
                   alt="Thumbnail"
                 />
-             
+
                 <img
                   v-else
                   class="h-full object-cover"
@@ -29,7 +30,7 @@
                   alt="Thumbnail"
                 />
 
-                
+
               </div>
               <div class="w-full py-3 pl-4 flex flex-col items-left">
                 <p class="font-bold">{{ artistName(item.title) }}</p>
@@ -83,8 +84,8 @@ const fetchData = async (query: string) => {
       return
     }
 
-    const filteredResults: Result[] = filterData(dataToFilter)
-    console.log('Filtered Results:', filteredResults)
+    const filteredResults = filterData(dataToFilter)
+
 
     //searchStore.setResults(result)
     searchStore.setResults(filteredResults)
@@ -103,12 +104,12 @@ onMounted(() => {
     console.log('RESULTS DATA is ARRAY:', Array.isArray(results.value))
     console.log('RESULTS LENGTH:', results.value.length)
 
+
     if (Array.isArray(results.value)) {
       console.log('Full results object:', results.value)
 
       if (results.value.length > 0) {
         console.log('LENGTH', results.value.length)
-        console.log('First result title:', results.value[0]?.title)
       }
     } else {
       console.warn("Parsed data does not contain a 'results' array:", results.value)

@@ -1,11 +1,11 @@
 interface Details {
-  master_id: number
-  year: string | number
-  resource_url: string
+  images: { resource_url: string }[]
+  artists: { name: string }[]
   title: string
-  uri: string
+  genres: string[]
+  tracklist: { position: string; title: string; duration: string }[]
+  videos: { uri: string }[]
 }
-
 
 const playButton = (trackTitle: string, array: Details[]) => {
   const matchedVideo = array?.find((video) =>
@@ -17,7 +17,7 @@ const playButton = (trackTitle: string, array: Details[]) => {
     return "../../public/play-button.png"
   }
 
-  return null
+  return undefined
 }
 
 export default playButton

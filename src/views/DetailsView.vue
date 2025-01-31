@@ -1,7 +1,8 @@
 <template>
-   <button @click="goBack" class="mt-5 ml-5 px-4 py-2 bg-green-500 text-white rounded">
-        Back to Results
-      </button>
+  <button @click="goBack" class="mt-5 ml-5 px-4 py-2 bg-green-500 text-white rounded">
+    Back to Results
+  </button>
+
   <main class="flex flex-col lg:flex-row justify-center mx-4 pt-10">
     <div v-if="loading">Loading details...</div>
     <div v-else-if="details" class="flex flex-col lg:flex-row gap-4 w-full">
@@ -9,21 +10,23 @@
       <div class="">
         <div class="flex w-full h-100 justify-center items-center">
           <img
-            v-if="
-              details.images[0]?.resource_url !==
-              'https://st.discogs.com/c4d19cea99cdfcd895132e47983ad7ea43099b37/images/spacer.gif'
-            "
+            v-if="details.images.length > 0"
             class="h-full object-cover"
-            :src="details.images[0].resource_url"
+            :src="details.images[0].resource_url ?? undefined"
             alt="Thumbnail"
           />
+
+          <img v-else class="h-full object-cover" src="../../public/No_cover.png" alt="Thumbnail" />
         </div>
       </div>
 
-      
-
       <!-- Right Section: Track List -->
+
       <div class="flex flex-col w-full">
+        <h1 class="self-start inline-block text-2xl bg-gray-200 px-4 text-gray-700 rounded-xl">
+          {{ details.year }}
+        </h1>
+
         <div class="flex flex-col mb-5">
           <h1 class="text-5xl mb-2">{{ details.artists[0].name }}</h1>
           <h1 class="text-4xl text-gray-500">{{ details.title }}</h1>
@@ -42,10 +45,10 @@
         </div>
 
         <!-- Track Listing -->
-        <div class="mr-4">
+        <div class="">
           <h3 class="font-bold text-xl mb-5">Track Listing:</h3>
           <ul>
-            <template v-for="(track, index) in details.tracklist" :key="index">
+            <template v-for="(track, index) in details.filteredTracks" :key="index">
               <!-- Track Item -->
               <li class="mb-5 h-15 text-xl py-5 flex items-center w-full rounded-xl bg-gray-200">
                 <!-- Track Position (15%) -->
@@ -55,12 +58,13 @@
 
                 <!-- Play Button (15%) -->
                 <div
-                  class="flex-shrink-0 flex-grow-0 basis-[15%] flex justify-center cursor-pointer"
-                  @click="toggleDropdown(index)"
+                  class="flex-shrink-0 flex-grow-0 basis-[10%] flex justify-center cursor-pointer"
+                  @click="toggleDropdown(index, track.title, details.videos)"
                 >
                   <img
+                    v-if="playButton(track.title, details.videos as any)"
                     class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 object-contain"
-                    src="../../public/play-button.png"
+                    :src="playButton(track.title, details.videos as any) "
                     alt="Play button"
                   />
                 </div>
@@ -81,7 +85,7 @@
                 <div class="bg-white shadow-lg rounded-xl p-4">
                   <iframe
                     class="w-full aspect-video"
-                    :src="details.videos[index].uri.replace('/watch?v=', '/embed/')"
+                    :src="getVideoUrl(track.title, details.videos as any)"
                     frameborder="0"
                     allow="autoplay; encrypted-media"
                     allowfullscreen
@@ -104,14 +108,21 @@ import { ref, onMounted, type Ref } from 'vue'
 import detailsCall from '@/api/detailsCall'
 import { useRoute, useRouter } from 'vue-router'
 import addZero from '../utils/addZero'
+import filterDetails from '@/utils/filterDetails'
+import getVideoUrl from '../utils/getVideoUrl'
+import playButton from '../utils/playButton'
 
 interface Details {
-  images: { resource_url: string }[]
+  images: { resource_url: string; uri: string }[]
   artists: { name: string }[]
   title: string
   genres: string[]
   tracklist: { position: string; title: string; duration: string }[]
-  videos: { uri: string }[]
+  videos: { title: string; uri: string }[]
+  filteredTracks: { position: string; title: string; duration: string }[]
+  year: string | number
+  uri: string
+
 }
 
 const route = useRoute()
@@ -126,7 +137,26 @@ const fetchDetails = async () => {
 
   try {
     const result = await detailsCall({ master: masterId.value })
-    details.value = result
+    //const filteredResults: Details[] = filterDetails(result)
+
+    if (!result || typeof result !== 'object') throw new Error('Invalid API response')
+
+    const mappedResult = {
+      images: result.images || [],
+      artists: result.artists || [],
+      title: result.title || '',
+      genres: result.genres || [],
+      tracklist: result.tracklist || [],
+      videos: result.videos || [],
+      filteredTracks: result.tracklist || [], // Assuming filteredTracks is derived from tracklist
+      year: result.year || '',
+      uri: result.uri || '',
+    } as Details
+
+
+    details.value = mappedResult;
+
+    console.log('DETAILS VALUE', filterDetails(result))
   } catch (error) {
     console.error('Error fetching details:', error)
   } finally {
@@ -138,8 +168,14 @@ const goBack = () => {
   router.push({ name: 'ResultsView' })
 }
 
-const toggleDropdown = (index: number) => {
-  openDropdown.value = openDropdown.value === index ? null : index
+const toggleDropdown = (index: number, trackTitle: string, array: { title: string; uri: string }[]) => {
+  const matchedVideo = array.find((video: { title: string }) =>
+    video.title.toLowerCase().includes(trackTitle.toLowerCase()),
+  )
+
+  if (matchedVideo) {
+    openDropdown.value = openDropdown.value === index ? null : index
+  }
 }
 
 onMounted(() => {

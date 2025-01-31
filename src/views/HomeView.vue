@@ -15,14 +15,6 @@ import apiCall from '../api/apiCall.ts'
 import { useSearchStore } from '../stores/searchStore'
 import filterData from '../utils/filterData'
 
-interface Result {
-  id: number
-  title: string
-  cover_image: string
-  year: number
-  release_date: string
-  master_id: number
-}
 
 const searchStore = useSearchStore() 
 const router = useRouter()
@@ -31,7 +23,7 @@ const fetchData = async (query: string) => {
   try {
     const result = await apiCall({ query })
     const dataToFilter = Array.isArray(result) ? result : result.results
-    const filteredResults: Result[] = filterData(dataToFilter)
+    const filteredResults = filterData(dataToFilter)
     //searchStore.setResults(result)
     searchStore.setResults(filteredResults)
     router.push({ name: 'ResultsView' })
