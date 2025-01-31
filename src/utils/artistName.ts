@@ -1,9 +1,8 @@
 const artistName = (title: string) => {
-  let index = title.indexOf('-')
-  let result = title.slice(0, index)
+  const index = title.indexOf('-')
+  const result = title.slice(0, index)
 
-  let equal = title.indexOf("=")
-  console.log("EQUAL INDEX", equal)
+  const equal = title.indexOf("=")
   if (equal !== -1) {
     return result.slice(0, equal)
   } else {
