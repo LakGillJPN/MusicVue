@@ -1,15 +1,7 @@
 const albumName = (title: string) => {
-  // Step 1, remove hyphen
-  let index = title.indexOf('-')
-  let result = title.slice(index + 1)
-
-  // Step 2, remove equal sign
-  let equal = result.indexOf('=')
-
-  // Step 3, loop to remove all equals
-  // while(equal !== -1) {
-  //  result = result.slice(0, equal) 
-  // }
+  const index = title.indexOf('-')
+  const result = title.slice(index + 1)
+  const equal = result.indexOf('=')
 
   if (equal !== -1 && result.length <= 30) {
     return result.slice(0, equal)
