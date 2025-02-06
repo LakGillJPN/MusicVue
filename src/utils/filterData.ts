@@ -13,7 +13,7 @@ const filterData = (array: Result[]) => {
 
   const filtered = uniq
   .filter((item) => item.master_id !== 0)
-  .filter((item) => parseInt(item.year.toString()) > 1800)
+  .filter((item) => parseInt(item?.year?.toString()) > 1800)
   return filtered.sort((a, b) => parseInt(a.year as string) - parseInt(b.year as string))
 }
 
