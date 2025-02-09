@@ -12,7 +12,7 @@ const handleSearch = () => {
 </script>
 
 <template>
-    <div class="flex justify-center items-center w-full sm:w-3/4 lg:w-1/2 px-4">
+    <div id="app-search-bar" class="flex justify-center items-center w-full sm:w-3/4 lg:w-1/2 px-4">
       <div class="flex w-full sm:w-4/5 lg:w-3/4 relative">
         <!-- Search Input -->
         <input
