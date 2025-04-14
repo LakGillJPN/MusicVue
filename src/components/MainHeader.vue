@@ -1,4 +1,50 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
+import { exchangeCodeForToken } from '../api/exchangeToken'
+import { useAuthStore } from '../stores/authStore'
+
+const auth = useAuthStore()
+const showDropdown = ref(false)
+
+const getCodeFromUrl = (): string | null => {
+  const params = new URLSearchParams(window.location.search)
+  if (!params.has('code')) {
+    return null
+  }
+  return params.get('code')
+}
+
+const logout = () => {
+  auth.logout()
+  window.location.reload()
+}
+
+const redirectToLogin = () => {
+  const domain = import.meta.env.VITE_AWS_DOMAIN
+  const clientId = import.meta.env.VITE_AWS_CLIENT_ID
+  const redirectUri = import.meta.env.VITE_AWS_REDIRECT_URI
+  const loginUrl = `${domain}/login?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`
+  window.location.href = loginUrl
+}
+
+onMounted(() => {
+  const code = getCodeFromUrl()
+
+  if (code) {
+    exchangeCodeForToken(code)
+      .then((data: { id_token: string }) => {
+        const idToken = data.id_token
+        const payload = JSON.parse(atob(idToken.split('.')[1]))
+        console.log('Username:', payload['cognito:username'])
+        auth.setUser(payload['cognito:username'], idToken)
+        // Clean the URL
+        window.history.replaceState({}, document.title, window.location.pathname)
+      })
+      .catch((err: Error) => {
+        console.error('Error exchanging code for token', err)
+      })
+  }
+})
 </script>
 
 <template>
@@ -9,7 +55,38 @@
         <ul class="flex space-x-6">
           <li><a href="/" class="hover:text-gray-300">Home</a></li>
           <li><a href="/about" class="hover:text-gray-300">About</a></li>
-          <li><a href="/login" class="hover:text-gray-300">Login</a></li>
+          <li v-if="auth.username" class="relative">
+            <a
+              @click="showDropdown = !showDropdown"
+              class="hover:bg-green-600 border-2 bg-green-500 p-2 rounded-lg text-white"
+            >
+              {{ auth.username }}
+          </a>
+            <ul
+              v-if="showDropdown"
+              class="absolute right-0 w-32 bg-white border rounded shadow-lg z-10"
+            >
+              <li>
+                <a
+                  href="#"
+                  @click.prevent="logout"
+                  class="block px-4 py-2 hover:bg-gray-200 text-black"
+                >
+                  Logout
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <li v-else>
+            <a
+              href="#"
+              @click.prevent="redirectToLogin"
+              class="hover:bg-green-600 border-2 bg-green-500 p-2 rounded-lg text-white"
+            >
+              Login
+            </a>
+          </li>
         </ul>
       </nav>
     </div>
