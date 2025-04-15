@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { exchangeCodeForToken } from '../api/exchangeToken'
 import { useAuthStore } from '../stores/authStore'
+import { createUser } from '../api/users'
 
 const auth = useAuthStore()
 const showDropdown = ref(false)
@@ -32,11 +33,21 @@ onMounted(() => {
 
   if (code) {
     exchangeCodeForToken(code)
-      .then((data: { id_token: string }) => {
+      .then(async (data: { id_token: string }) => {
         const idToken = data.id_token
         const payload = JSON.parse(atob(idToken.split('.')[1]))
-        console.log('Username:', payload['cognito:username'])
+        const username = payload['cognito:username']
+
+        console.log('Username:', username)
         auth.setUser(payload['cognito:username'], idToken)
+
+        try {
+          const res = await createUser(username)
+          console.log('User created or already exists:', res)
+        } catch (e) {
+          console.error('Error creating user:', e)
+        }
+
         // Clean the URL
         window.history.replaceState({}, document.title, window.location.pathname)
       })
@@ -61,7 +72,7 @@ onMounted(() => {
               class="hover:bg-green-600 border-2 bg-green-500 p-2 rounded-lg text-white"
             >
               {{ auth.username }}
-          </a>
+            </a>
             <ul
               v-if="showDropdown"
               class="absolute right-0 w-32 bg-white border rounded shadow-lg z-10"
