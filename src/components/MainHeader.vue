@@ -85,6 +85,12 @@ onMounted(() => {
                 >
                   Logout
                 </a>
+                <a
+                  href="./profile"
+                  class="block px-4 py-2 hover:bg-gray-200 text-black"
+                >
+                  Profile
+                </a>
               </li>
             </ul>
           </li>
