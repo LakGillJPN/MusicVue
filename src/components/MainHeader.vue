@@ -4,8 +4,12 @@ import { exchangeCodeForToken } from '../api/exchangeToken'
 import { useAuthStore } from '../stores/authStore'
 import { createUser } from '../api/users'
 
+
 const auth = useAuthStore()
 const showDropdown = ref(false)
+const domain = import.meta.env.VITE_AWS_DOMAIN
+const clientId = import.meta.env.VITE_AWS_CLIENT_ID
+const redirectUri = import.meta.env.VITE_AWS_REDIRECT_URI
 
 const getCodeFromUrl = (): string | null => {
   const params = new URLSearchParams(window.location.search)
@@ -17,13 +21,11 @@ const getCodeFromUrl = (): string | null => {
 
 const logout = () => {
   auth.logout()
-  window.location.reload()
+  const logoutUrl = `${domain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(redirectUri)}`
+  window.location.href = logoutUrl
 }
 
 const redirectToLogin = () => {
-  const domain = import.meta.env.VITE_AWS_DOMAIN
-  const clientId = import.meta.env.VITE_AWS_CLIENT_ID
-  const redirectUri = import.meta.env.VITE_AWS_REDIRECT_URI
   const loginUrl = `${domain}/login?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`
   window.location.href = loginUrl
 }
@@ -79,17 +81,17 @@ onMounted(() => {
             >
               <li>
                 <a
-                  href="#"
-                  @click.prevent="logout"
-                  class="block px-4 py-2 hover:bg-gray-200 text-black"
-                >
-                  Logout
-                </a>
-                <a
                   href="./profile"
                   class="block px-4 py-2 hover:bg-gray-200 text-black"
                 >
                   Profile
+                </a>
+                <a
+                  href="#"
+                  @click.prevent="logout"
+                  class="block bg-red-700 text-white px-4 py-2 hover:bg-gray-200 text-black"
+                >
+                  Logout
                 </a>
               </li>
             </ul>
