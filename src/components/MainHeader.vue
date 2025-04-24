@@ -38,13 +38,15 @@ onMounted(() => {
       .then(async (data: { id_token: string }) => {
         const idToken = data.id_token
         const payload = JSON.parse(atob(idToken.split('.')[1]))
+        console.log('Payload:', payload)
         const username = payload['cognito:username']
-
+        const email = payload['email']
+        const cognitoID = payload['sub']
+        console.log('Cognito ID:', cognitoID)
         console.log('Username:', username)
-        auth.setUser(payload['cognito:username'], idToken)
-
+        auth.setUser(username, idToken, cognitoID)
         try {
-          const res = await createUser(username)
+          const res = await createUser(username, cognitoID, email, )
           console.log('User created or already exists:', res)
         } catch (e) {
           console.error('Error creating user:', e)
