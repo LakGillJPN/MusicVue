@@ -22,6 +22,7 @@ export const getUserById = async (cognitoId: string): Promise<User> => {
   const response = await axios.get<User>(`${API_BASE_URL}/get_user.php`, {
     params: { cognitoId },
   });
+  console.log('User data:', response.data); // Log the user data
   return response.data;
 };
 

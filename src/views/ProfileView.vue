@@ -39,19 +39,19 @@
         </div>
         <ul class="mt-2 flex gap-2 text-md text-gray-700" v-if="genreList.length">
           <li
-  class="border-2 bg-green-600 text-white rounded-xl p-2 flex items-center space-x-2"
-  v-for="(genre, index) in genreList"
-  :key="index"
->
-  <span>{{ genre }}</span>
-  <button
-    @click="removeGenre(index)"
-    class="ml-1 text-white hover:text-red-300 font-bold"
-    aria-label="Remove genre"
-  >
-    ×
-  </button>
-</li>
+            class="border-2 bg-green-600 text-white rounded-xl p-2 flex items-center space-x-2"
+            v-for="(genre, index) in genreList"
+            :key="index"
+          >
+            <span>{{ genre }}</span>
+            <button
+              @click="removeGenre(index)"
+              class="ml-1 text-white hover:text-red-300 font-bold"
+              aria-label="Remove genre"
+            >
+              ×
+            </button>
+          </li>
         </ul>
       </div>
 
@@ -82,16 +82,26 @@
           </li>
         </ul>
       </div>
+      <button
+        @click="saveFavourites"
+        class="mt-4 p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Save Favourites
+      </button>
     </div>
   </main>
 </template>
 
 <script setup lang="ts">
-import { watch, ref } from 'vue'
+import { onMounted, watch, ref } from 'vue'
 import { useAuthStore } from '../stores/authStore'
+import { useUserStore } from '@/stores/userStore'
 import genreArray from '../utils/genreArray'
+import { getFavourites, addFavourites } from '@/api/favourites'
 
 const auth = useAuthStore()
+const user = useUserStore()
+const userId = user.user?.userId
 
 const favGenreRef = ref<HTMLInputElement | null>(null)
 const favArtistsRef = ref<HTMLInputElement | null>(null)
@@ -101,6 +111,19 @@ const artistList = ref<string[]>([])
 
 const genreSuggestions = ref<string[]>([])
 const genreInput = ref('')
+
+onMounted(async () => {
+  if (auth.cognitoId) {
+    try {
+      const data = await getFavourites(auth.cognitoId)
+      console.log('Fetched favourites:', data)
+      genreList.value = data.favGenres || []
+      artistList.value = data.favArtists || []
+    } catch (error) {
+      console.error('Failed to fetch favourites:', error)
+    }
+  }
+})
 
 watch(genreInput, (newVal) => {
   if (!newVal) {
@@ -133,12 +156,26 @@ const removeGenre = (index: number) => {
   genreList.value.splice(index, 1)
 }
 
-
 const addArtist = () => {
   const artist = favArtistsRef.value?.value.trim()
   if (artist) {
     artistList.value.push(artist)
     favArtistsRef.value!.value = ''
+  }
+}
+
+const saveFavourites = async () => {
+  try {
+    await addFavourites({
+      userId: userId,
+      favGenres: genreList.value,
+      favArtists: artistList.value,
+      favAlbums: [], // Add album input handling if needed
+    })
+    alert('Favourites saved successfully!')
+  } catch (error) {
+    console.error('Failed to save favourites:', error)
+    alert('Failed to save favourites.')
   }
 }
 </script>

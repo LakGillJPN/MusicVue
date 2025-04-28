@@ -8,6 +8,7 @@ export const useUserStore = defineStore('user', {
   }),
   actions: {
     async fetchUser(cognitoId: string) {
+
       this.user = await getUserById(cognitoId)
     },
   },
