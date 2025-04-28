@@ -4,8 +4,12 @@ import { exchangeCodeForToken } from '../api/exchangeToken'
 import { useAuthStore } from '../stores/authStore'
 import { createUser } from '../api/users'
 
+
 const auth = useAuthStore()
 const showDropdown = ref(false)
+const domain = import.meta.env.VITE_AWS_DOMAIN
+const clientId = import.meta.env.VITE_AWS_CLIENT_ID
+const redirectUri = import.meta.env.VITE_AWS_REDIRECT_URI
 
 const getCodeFromUrl = (): string | null => {
   const params = new URLSearchParams(window.location.search)
@@ -17,13 +21,11 @@ const getCodeFromUrl = (): string | null => {
 
 const logout = () => {
   auth.logout()
-  window.location.reload()
+  const logoutUrl = `${domain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(redirectUri)}`
+  window.location.href = logoutUrl
 }
 
 const redirectToLogin = () => {
-  const domain = import.meta.env.VITE_AWS_DOMAIN
-  const clientId = import.meta.env.VITE_AWS_CLIENT_ID
-  const redirectUri = import.meta.env.VITE_AWS_REDIRECT_URI
   const loginUrl = `${domain}/login?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}`
   window.location.href = loginUrl
 }
@@ -36,13 +38,15 @@ onMounted(() => {
       .then(async (data: { id_token: string }) => {
         const idToken = data.id_token
         const payload = JSON.parse(atob(idToken.split('.')[1]))
+        console.log('Payload:', payload)
         const username = payload['cognito:username']
-
+        const email = payload['email']
+        const cognitoID = payload['sub']
+        console.log('Cognito ID:', cognitoID)
         console.log('Username:', username)
-        auth.setUser(payload['cognito:username'], idToken)
-
+        auth.setUser(username, idToken, cognitoID)
         try {
-          const res = await createUser(username)
+          const res = await createUser(username, cognitoID, email, )
           console.log('User created or already exists:', res)
         } catch (e) {
           console.error('Error creating user:', e)
@@ -79,9 +83,15 @@ onMounted(() => {
             >
               <li>
                 <a
+                  href="./profile"
+                  class="block px-4 py-2 hover:bg-gray-200 text-black"
+                >
+                  Profile
+                </a>
+                <a
                   href="#"
                   @click.prevent="logout"
-                  class="block px-4 py-2 hover:bg-gray-200 text-black"
+                  class="block bg-red-700 text-white px-4 py-2 hover:bg-gray-200 text-black"
                 >
                   Logout
                 </a>
