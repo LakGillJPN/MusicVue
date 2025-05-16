@@ -18,6 +18,15 @@
 
           <img v-else class="h-full object-cover" src="../../public/No_cover.png" alt="Thumbnail" />
         </div>
+        <div class="mt-4 flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="add-favourite"
+            v-model="details.isFavourite"
+            class="form-checkbox h-4 w-4 text-blue-600"
+          />
+          <label for="add-favourite" class="text-gray-700">Add to Favourites</label>
+        </div>
       </div>
 
       <!-- Right Section: Track List -->
@@ -64,7 +73,7 @@
                   <img
                     v-if="playButton(track.title, details.videos as any)"
                     class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 object-contain"
-                    :src="playButton(track.title, details.videos as any) "
+                    :src="playButton(track.title, details.videos as any)"
                     alt="Play button"
                   />
                 </div>
@@ -122,7 +131,6 @@ interface Details {
   filteredTracks: { position: string; title: string; duration: string }[]
   year: string | number
   uri: string
-
 }
 
 const route = useRoute()
@@ -153,8 +161,7 @@ const fetchDetails = async () => {
       uri: result.uri || '',
     } as Details
 
-
-    details.value = mappedResult;
+    details.value = mappedResult
 
     console.log('DETAILS VALUE', filterDetails(result))
   } catch (error) {
@@ -168,7 +175,11 @@ const goBack = () => {
   router.push({ name: 'ResultsView' })
 }
 
-const toggleDropdown = (index: number, trackTitle: string, array: { title: string; uri: string }[]) => {
+const toggleDropdown = (
+  index: number,
+  trackTitle: string,
+  array: { title: string; uri: string }[],
+) => {
   const matchedVideo = array.find((video: { title: string }) =>
     video.title.toLowerCase().includes(trackTitle.toLowerCase()),
   )
