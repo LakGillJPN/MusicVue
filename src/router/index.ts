@@ -4,6 +4,7 @@ import ResultsView from '@/views/ResultsView.vue'
 import AboutView from '@/views/AboutView.vue'
 import DetailsView from '@/views/DetailsView.vue'
 import ProfileView from '@/views/ProfileView.vue'
+import FavouritesView from '../views/FavouritesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,9 +18,8 @@ const router = createRouter({
     { path: '/about', name: 'AboutView', component: AboutView },
     { path: '/profile', name: 'ProfileView', component: ProfileView },
     { path: '/details/:masterId', name: 'DetailsView', component: DetailsView, props: true },
+    { path: '/favourites', name: 'FavouritesView', component: FavouritesView },
   ],
-
-  
 })
 
 export default router

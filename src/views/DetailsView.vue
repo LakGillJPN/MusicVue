@@ -1,7 +1,7 @@
 <template>
-  <button @click="goBack" class="mt-5 ml-5 px-4 py-2 bg-green-500 text-white rounded">
+  <!-- <button @click="goBack" class="mt-5 ml-5 px-4 py-2 bg-green-500 text-white rounded">
     Back to Results
-  </button>
+  </button> -->
 
   <main class="flex flex-col lg:flex-row justify-center mx-4 pt-10">
     <div v-if="loading">Loading details...</div>
@@ -17,6 +17,16 @@
           />
 
           <img v-else class="h-full object-cover" src="../../public/No_cover.png" alt="Thumbnail" />
+        </div>
+        <div class="mt-4 flex items-center space-x-2">
+          <input
+            type="checkbox"
+            id="add-favourite"
+            :checked="isFavourite"
+            @change="toggleFavourite"
+            class="form-checkbox h-4 w-4 text-blue-600"
+          />
+          <label for="add-favourite" class="text-gray-700">Add to Favourites</label>
         </div>
       </div>
 
@@ -64,7 +74,7 @@
                   <img
                     v-if="playButton(track.title, details.videos as any)"
                     class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 object-contain"
-                    :src="playButton(track.title, details.videos as any) "
+                    :src="playButton(track.title, details.videos as any)"
                     alt="Play button"
                   />
                 </div>
@@ -106,11 +116,53 @@
 <script setup lang="ts">
 import { ref, onMounted, type Ref } from 'vue'
 import detailsCall from '@/api/detailsCall'
+import { getAlbums, addAlbums, deleteAlbums } from '@/api/album'
+import { useAuthStore } from '../stores/authStore'
 import { useRoute, useRouter } from 'vue-router'
 import addZero from '../utils/addZero'
 import filterDetails from '@/utils/filterDetails'
 import getVideoUrl from '../utils/getVideoUrl'
 import playButton from '../utils/playButton'
+import { useUserStore } from '@/stores/userStore';
+const auth = useAuthStore()
+const user = useUserStore()
+const userId = user.user?.userId
+
+const isFavourite = ref(false)
+const toggleFavourite = async () => {
+  isFavourite.value = !isFavourite.value
+
+  if (!details.value) return
+  if (!userId) {
+    console.error('User not authenticated')
+    return
+  }
+  console.log('USERID:', auth.cognitoId)
+  const albums = [masterId.value];
+
+  if (!userId) {
+    console.error('User not authenticated')
+    return
+  }
+
+  const albumData = {
+    userId,
+    albums
+  }
+
+  try {
+    if (isFavourite.value) {
+      const response = await addAlbums(albumData)
+      console.log('Album added:', response)
+    } else {
+      const response = await deleteAlbums(albumData)
+      console.log('Album removed:', response)
+    }
+  } catch (err) {
+    console.error('Failed to update favourite album:', err)
+  }
+}
+
 
 interface Details {
   images: { resource_url: string; uri: string }[]
@@ -122,7 +174,6 @@ interface Details {
   filteredTracks: { position: string; title: string; duration: string }[]
   year: string | number
   uri: string
-
 }
 
 const route = useRoute()
@@ -137,7 +188,6 @@ const fetchDetails = async () => {
 
   try {
     const result = await detailsCall({ master: masterId.value })
-    //const filteredResults: Details[] = filterDetails(result)
 
     if (!result || typeof result !== 'object') throw new Error('Invalid API response')
 
@@ -153,8 +203,7 @@ const fetchDetails = async () => {
       uri: result.uri || '',
     } as Details
 
-
-    details.value = mappedResult;
+    details.value = mappedResult
 
     console.log('DETAILS VALUE', filterDetails(result))
   } catch (error) {
@@ -164,11 +213,15 @@ const fetchDetails = async () => {
   }
 }
 
-const goBack = () => {
-  router.push({ name: 'ResultsView' })
-}
+// const goBack = () => {
+//   router.push({ name: 'ResultsView' })
+// }
 
-const toggleDropdown = (index: number, trackTitle: string, array: { title: string; uri: string }[]) => {
+const toggleDropdown = (
+  index: number,
+  trackTitle: string,
+  array: { title: string; uri: string }[],
+) => {
   const matchedVideo = array.find((video: { title: string }) =>
     video.title.toLowerCase().includes(trackTitle.toLowerCase()),
   )
@@ -178,13 +231,25 @@ const toggleDropdown = (index: number, trackTitle: string, array: { title: strin
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   masterId.value = Number(route.params.masterId)
-  if (masterId.value) {
-    fetchDetails()
+
+  if (masterId.value && userId) {
+    try {
+      const res = await getAlbums(userId)
+      console.log("RES", res)
+      if (res.favourites?.includes(masterId.value.toString())) {
+        isFavourite.value = true
+      }
+    } catch (err) {
+      console.error('Error checking favourite status:', err)
+    }
+
+    await fetchDetails()
   } else {
     loading.value = false
   }
 })
+
 </script>
 <style lang=""></style>
