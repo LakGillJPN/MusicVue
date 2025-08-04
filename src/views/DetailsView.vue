@@ -1,7 +1,7 @@
 <template>
-  <button @click="goBack" class="mt-5 ml-5 px-4 py-2 bg-green-500 text-white rounded">
+  <!-- <button @click="goBack" class="mt-5 ml-5 px-4 py-2 bg-green-500 text-white rounded">
     Back to Results
-  </button>
+  </button> -->
 
   <main class="flex flex-col lg:flex-row justify-center mx-4 pt-10">
     <div v-if="loading">Loading details...</div>
@@ -213,9 +213,9 @@ const fetchDetails = async () => {
   }
 }
 
-const goBack = () => {
-  router.push({ name: 'ResultsView' })
-}
+// const goBack = () => {
+//   router.push({ name: 'ResultsView' })
+// }
 
 const toggleDropdown = (
   index: number,

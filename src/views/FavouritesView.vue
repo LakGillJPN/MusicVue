@@ -1,6 +1,6 @@
 <template>
   <main class="">
-    <h1 class="text-center text-2xl font-bold my-4">Your Favourite Albums</h1>
+    <h1 class="text-center text-2xl font-bold my-4">Favourite Albums</h1>
     <div v-if="loading" class="text-center">Loading...</div>
     <div v-else-if="albumDetails.length > 0">
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 w-[90%] mx-auto">
@@ -56,7 +56,6 @@ const router = useRouter();
 const loading = ref(true);
 const albumDetails = ref<AlbumDetail[]>([]);
 
-// Fetch favourites and then fetch album details
 const fetchFavourites = async () => {
   try {
     if (!userId) {
