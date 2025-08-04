@@ -4,7 +4,6 @@ import { exchangeCodeForToken } from '../api/exchangeToken'
 import { useAuthStore } from '../stores/authStore'
 import { createUser } from '../api/users'
 
-
 const auth = useAuthStore()
 const showDropdown = ref(false)
 const domain = import.meta.env.VITE_AWS_DOMAIN
@@ -46,7 +45,7 @@ onMounted(() => {
         console.log('Username:', username)
         auth.setUser(username, idToken, cognitoID)
         try {
-          const res = await createUser(username, cognitoID, email, )
+          const res = await createUser(username, cognitoID, email)
           console.log('User created or already exists:', res)
         } catch (e) {
           console.error('Error creating user:', e)
@@ -82,11 +81,11 @@ onMounted(() => {
               class="absolute right-0 w-32 bg-white border rounded shadow-lg z-10"
             >
               <li>
-                <a
-                  href="./profile"
-                  class="block px-4 py-2 hover:bg-gray-200 text-black"
-                >
+                <a href="./profile" class="block px-4 py-2 hover:bg-gray-200 text-black">
                   Profile
+                </a>
+                <a href="./favourites" class="block px-4 py-2 hover:bg-gray-200 text-black">
+                  Favourites
                 </a>
                 <a
                   href="#"
