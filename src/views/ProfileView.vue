@@ -72,15 +72,22 @@
             Enter
           </button>
         </div>
-        <ul class="mt-2 flex gap-2 text-md text-gray-700" v-if="artistList.length">
-          <li
-            class="border-2 bg-white text-green-600 rounded-xl p-2"
-            v-for="(artist, index) in artistList"
-            :key="index"
-          >
-            {{ artist }}
-          </li>
-        </ul>
+      <ul class="mt-2 flex gap-2 text-md text-gray-700" v-if="artistList.length">
+  <li
+    class="border-2 bg-white text-green-600 rounded-xl p-2 flex items-center space-x-2"
+    v-for="(artist, index) in artistList"
+    :key="index"
+  >
+    <span>{{ artist }}</span>
+    <button
+      @click="removeArtist(index)"
+      class="ml-1 text-green-600 hover:text-red-400 font-bold"
+      aria-label="Remove artist"
+    >
+      ×
+    </button>
+  </li>
+</ul>
       </div>
       <button
         @click="saveFavourites"
@@ -97,7 +104,7 @@ import { onMounted, watch, ref } from 'vue'
 import { useAuthStore } from '../stores/authStore'
 import { useUserStore } from '@/stores/userStore'
 import genreArray from '../utils/genreArray'
-import { getFavourites, addFavourites } from '@/api/favourites'
+import { getFavourites, addFavourites, deleteFavourites } from '@/api/favourites'
 
 const auth = useAuthStore()
 const user = useUserStore()
@@ -152,9 +159,21 @@ const addGenre = () => {
   }
 }
 
-const removeGenre = (index: number) => {
+const removeGenre = async (index: number) => {
+  const genreToRemove = genreList.value[index]
   genreList.value.splice(index, 1)
+
+  try {
+    await deleteFavourites({
+      userId: userId,
+      favGenres: [genreToRemove],
+    })
+    console.log(`Deleted genre: ${genreToRemove}`)
+  } catch (error) {
+    console.error('Failed to delete genre:', error)
+  }
 }
+
 
 const addArtist = () => {
   const artist = favArtistsRef.value?.value.trim()
@@ -163,6 +182,22 @@ const addArtist = () => {
     favArtistsRef.value!.value = ''
   }
 }
+
+const removeArtist = async (index: number) => {
+  const artistToRemove = artistList.value[index]
+  artistList.value.splice(index, 1)
+
+  try {
+    await deleteFavourites({
+      userId: userId,
+      favArtists: [artistToRemove],
+    })
+    console.log(`Deleted artist: ${artistToRemove}`)
+  } catch (error) {
+    console.error('Failed to delete artist:', error)
+  }
+}
+
 
 const saveFavourites = async () => {
   try {

@@ -1,12 +1,11 @@
-// types.ts
 export interface Favourites {
   userId: number;
-  cognitoId: string;
-  favGenres: string;
-  favArtists: string;
-  favAlbums: string;
+  cognitoId: number;
+  favGenres: string[] | null;
+  favArtists: string[] | null;
+  favAlbums: string[] | null;
 }
-// api/favourites.ts
+
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost/php-project/api';
@@ -24,5 +23,12 @@ export const addFavourites = async (data: Favourites): Promise<{ success: boolea
   console.log(`Adding favourites for userId: ${data.userId}`);
   const response = await axios.post(`${API_BASE_URL}/add_favourites.php`, data);
   console.log('Add favourites response:', response.data);
+  return response.data;
+};
+
+export const deleteFavourites = async (data: Partial<Favourites>): Promise<{ success?: boolean; message?: string; error?: string }> => {
+  console.log(`Deleting favourites for userId: ${data.userId}`);
+  const response = await axios.post(`${API_BASE_URL}/delete_favourites.php`, data);
+  console.log('Delete favourites response:', response.data);
   return response.data;
 };
