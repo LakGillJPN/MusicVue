@@ -1,7 +1,7 @@
 <template>
   <main class="h-screen flex flex-col justify-center items-center">
     <div class="flex flex-col text-left space-y-8 w-80">
-      <p class="text-2xl font-semibold">{{ auth.username }}</p>
+      <p class="text-2xl text-center font-semibold">{{ auth.username }}</p>
 
       <!-- Favourite Genres Section -->
       <div>
@@ -39,9 +39,12 @@
         </div>
         <ul class="mt-2 flex gap-2 text-md text-gray-700" v-if="genreList.length">
           <li
-            class="border-2 bg-green-600 text-white rounded-xl p-2 flex items-center space-x-2"
             v-for="(genre, index) in genreList"
             :key="index"
+            :class="[
+              'border-2 rounded-xl p-2 flex items-center space-x-2',
+              newGenres.has(genre) ? 'bg-green-700 text-white' : 'bg-green-600 text-white',
+            ]"
           >
             <span>{{ genre }}</span>
             <button
@@ -72,22 +75,25 @@
             Enter
           </button>
         </div>
-      <ul class="mt-2 flex gap-2 text-md text-gray-700" v-if="artistList.length">
-  <li
-    class="border-2 bg-white text-green-600 rounded-xl p-2 flex items-center space-x-2"
-    v-for="(artist, index) in artistList"
-    :key="index"
-  >
-    <span>{{ artist }}</span>
-    <button
-      @click="removeArtist(index)"
-      class="ml-1 text-green-600 hover:text-red-400 font-bold"
-      aria-label="Remove artist"
-    >
-      ×
-    </button>
-  </li>
-</ul>
+        <ul class="mt-2 flex gap-2 text-md text-gray-700" v-if="artistList.length">
+          <li
+            v-for="(artist, index) in artistList"
+            :key="index"
+            :class="[
+              'border-2 rounded-xl p-2 flex items-center space-x-2',
+              newArtists.has(artist) ? 'bg-gray-200 text-green-700' : 'bg-white text-green-600',
+            ]"
+          >
+            <span>{{ artist }}</span>
+            <button
+              @click="removeArtist(index)"
+              class="ml-1 text-green-600 hover:text-red-400 font-bold"
+              aria-label="Remove artist"
+            >
+              ×
+            </button>
+          </li>
+        </ul>
       </div>
       <button
         @click="saveFavourites"
@@ -108,13 +114,24 @@ import { getFavourites, addFavourites, deleteFavourites } from '@/api/favourites
 
 const auth = useAuthStore()
 const user = useUserStore()
-const userId = user.user?.userId
+let userId = 0;
+
+if (user.user) {
+  userId = user.user?.userId
+  if (!userId) {
+    console.error('User not authenticated')
+  }
+  console.log('USERID:', userId)
+}
 
 const favGenreRef = ref<HTMLInputElement | null>(null)
 const favArtistsRef = ref<HTMLInputElement | null>(null)
 
 const genreList = ref<string[]>([])
 const artistList = ref<string[]>([])
+
+const newGenres = ref<Set<string>>(new Set())
+const newArtists = ref<Set<string>>(new Set())
 
 const genreSuggestions = ref<string[]>([])
 const genreInput = ref('')
@@ -146,15 +163,19 @@ watch(genreInput, (newVal) => {
 })
 
 const selectSuggestion = (genre: string) => {
-  genreList.value.push(genre)
+  if (!genreList.value.includes(genre)) {
+    genreList.value.push(genre)
+    newGenres.value.add(genre)
+  }
   genreInput.value = ''
   genreSuggestions.value = []
 }
 
 const addGenre = () => {
   const genre = favGenreRef.value?.value.trim()
-  if (genre) {
+  if (genre && !genreList.value.includes(genre)) {
     genreList.value.push(genre)
+    newGenres.value.add(genre)
     favGenreRef.value!.value = ''
   }
 }
@@ -174,11 +195,11 @@ const removeGenre = async (index: number) => {
   }
 }
 
-
 const addArtist = () => {
   const artist = favArtistsRef.value?.value.trim()
-  if (artist) {
+  if (artist && !artistList.value.includes(artist)) {
     artistList.value.push(artist)
+    newArtists.value.add(artist)
     favArtistsRef.value!.value = ''
   }
 }
@@ -198,15 +219,18 @@ const removeArtist = async (index: number) => {
   }
 }
 
-
 const saveFavourites = async () => {
   try {
     await addFavourites({
       userId: userId,
       favGenres: genreList.value,
       favArtists: artistList.value,
-      favAlbums: [], // Add album input handling if needed
+      favAlbums: [],
+      cognitoId: auth.cognitoId || undefined,
     })
+    newGenres.value.clear()
+    newArtists.value.clear()
+
     alert('Favourites saved successfully!')
   } catch (error) {
     console.error('Failed to save favourites:', error)

@@ -61,8 +61,12 @@ const fetchFavourites = async () => {
     if (!userId) {
       throw new Error('No userId found in localStorage');
     }
-
+   
     const favouritesResponse = await getAlbums(userId);
+    if (favouritesResponse.error) {
+      throw new Error(favouritesResponse.error);
+    }
+
     console.log('Favourites response:', favouritesResponse);
     const albumIds = favouritesResponse.favourites;
 

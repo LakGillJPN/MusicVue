@@ -1,6 +1,6 @@
 export interface AlbumData {
-  userId: number | null;
-  albums: string[] | null;
+  userId: number;
+  albums: (number | null)[];
 }
 
 import axios from 'axios';
@@ -21,7 +21,7 @@ const deleteAlbums = async (data: AlbumData): Promise<{ message?: string; error?
   return response.data;
 };
 
-const getAlbums = async (userId: number): Promise<{ favourites?: string[]; error?: string }> => {
+const getAlbums: (userId: number) => Promise<{ favourites?: string[]; error?: string }> = async (userId: number) => {
   console.log(`Fetching albums for userId: ${userId}`);
   const response = await axios.post(`${API_BASE_URL}/get_albums.php`, { userId });
   console.log('Get albums response:', response.data);
