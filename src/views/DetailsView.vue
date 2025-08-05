@@ -118,7 +118,7 @@ import { ref, onMounted, type Ref } from 'vue'
 import detailsCall from '@/api/detailsCall'
 import { getAlbums, addAlbums, deleteAlbums } from '@/api/album'
 import { useAuthStore } from '../stores/authStore'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import addZero from '../utils/addZero'
 import filterDetails from '@/utils/filterDetails'
 import getVideoUrl from '../utils/getVideoUrl'
@@ -139,6 +139,7 @@ const toggleFavourite = async () => {
   }
   console.log('USERID:', auth.cognitoId)
   const albums = [masterId.value];
+  
 
   if (!userId) {
     console.error('User not authenticated')
@@ -152,6 +153,7 @@ const toggleFavourite = async () => {
 
   try {
     if (isFavourite.value) {
+    
       const response = await addAlbums(albumData)
       console.log('Album added:', response)
     } else {
@@ -177,7 +179,6 @@ interface Details {
 }
 
 const route = useRoute()
-const router = useRouter()
 const masterId = ref<number | null>(null)
 const details: Ref<Details | null> = ref(null)
 const openDropdown = ref<number | null>(null)

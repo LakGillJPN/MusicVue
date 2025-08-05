@@ -1,6 +1,6 @@
 export interface Favourites {
   userId: number;
-  cognitoId: number;
+  cognitoId: number | undefined;
   favGenres: string[] | null;
   favArtists: string[] | null;
   favAlbums: string[] | null;
