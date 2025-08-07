@@ -1,8 +1,4 @@
 <template>
-  <button @click="goBack" class="mt-5 ml-5 px-4 py-2 bg-green-500 text-white rounded">
-    Back to Results
-  </button>
-
   <main class="flex flex-col lg:flex-row justify-center mx-4 pt-10">
     <div v-if="loading">Loading details...</div>
     <div v-else-if="details" class="flex flex-col lg:flex-row gap-4 w-full">
