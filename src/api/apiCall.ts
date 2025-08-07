@@ -5,21 +5,33 @@ interface ApiCallParams {
   maxPages?: number; // Optional: default to 10
 }
 
+interface DiscogsApiResult {
+  results: Result[];
+}
+
+interface Result {
+  id: number
+  title: string
+  cover_image: string
+  year: number
+  release_date: string
+  master_id: number
+}
+
 const consumerKey = import.meta.env.VITE_CONSUMER_KEY;
 const consumerSecret = import.meta.env.VITE_CONSUMER_SECRET;
 const userAgent = import.meta.env.VITE_USER_AGENT;
 
 const apiCall = async ({ query, maxPages = 10 }: ApiCallParams) => {
   const perPage = 100;
-  let allResults: any[] = [];
+  let allResults: Result[] = [];
   let currentPage = 1;
-
   try {
     while (currentPage <= maxPages) {
       const apiURL = `https://api.discogs.com/database/search?format=album&artist=${encodeURIComponent(query)}&per_page=${perPage}&page=${currentPage}`;
       console.log(`🔄 Fetching page ${currentPage}...`);
 
-      const response = await axios.get(apiURL, {
+      const response = await axios.get<DiscogsApiResult>(apiURL, {
         headers: {
           "User-Agent": userAgent,
           "Authorization": `Discogs key=${consumerKey}, secret=${consumerSecret}`

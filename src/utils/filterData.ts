@@ -17,7 +17,7 @@ interface Result {
   formats: Format[]
 }
 
-const filterData = (array: Result[]) => {
+const filterData = (array: Result[]): Result[] => {
   console.log('🔍 Starting data filtering...', array)
   console.log('🔍 Original array length:', array.length)
 

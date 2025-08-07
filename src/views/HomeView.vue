@@ -15,17 +15,34 @@ import apiCall from '../api/apiCall.ts'
 import { useSearchStore } from '../stores/searchStore'
 import filterData from '../utils/filterData'
 
-
-const searchStore = useSearchStore() 
+const searchStore = useSearchStore()
 const router = useRouter()
 
 const fetchData = async (query: string) => {
   try {
     const result = await apiCall({ query })
-    const dataToFilter = Array.isArray(result) ? result : result.results
-    const filteredResults = filterData(dataToFilter)
-    //searchStore.setResults(result)
-    searchStore.setResults(filteredResults)
+    const dataToFilter = Array.isArray(result) ? result : []
+    if (!Array.isArray(dataToFilter)) {
+      console.error('Data to filter is not an array:', dataToFilter)
+      return
+    }
+
+    // Ensure each item has type, role, and formats properties
+    const normalizedData = dataToFilter.map((item) => ({
+      type: '',
+      role: '',
+      formats: [],
+      ...item,
+    }))
+    const filteredResults = filterData(normalizedData)
+
+    // Ensure release_date is always a string (never undefined)
+    const resultsWithReleaseDate = filteredResults.map((item) => ({
+      ...item,
+      release_date: item.release_date ?? '',
+    }))
+
+    searchStore.setResults(resultsWithReleaseDate)
     router.push({ name: 'ResultsView' })
   } catch (error) {
     console.error('Error fetching data:', error)
