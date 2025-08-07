@@ -61,8 +61,11 @@ interface Result {
   title: string
   cover_image: string
   year: number
-  release_date: string
+  release_date: string 
   master_id: number
+  type: string
+  role: string
+  formats: string[]
 }
 
 const router = useRouter()
@@ -78,17 +81,28 @@ const goToDetails = (masterId: number) => {
 const fetchData = async (query: string) => {
   try {
     const result = await apiCall({ query })
-    const dataToFilter = Array.isArray(result) ? result : result.results
+    const dataToFilter = Array.isArray(result) ? result : []
     if (!Array.isArray(dataToFilter)) {
       console.error('Data to filter is not an array:', dataToFilter)
       return
     }
 
-    const filteredResults = filterData(dataToFilter)
+    // Ensure each item has type, role, and formats properties
+    const normalizedData = dataToFilter.map(item => ({
+      type: '',
+      role: '',
+      formats: [],
+      ...item
+    }))
+    const filteredResults = filterData(normalizedData)
 
+    // Ensure release_date is always a string (never undefined)
+    const resultsWithReleaseDate = filteredResults.map(item => ({
+      ...item,
+      release_date: item.release_date ?? ''
+    }))
 
-    //searchStore.setResults(result)
-    searchStore.setResults(filteredResults)
+    searchStore.setResults(resultsWithReleaseDate)
 
     router.push({ name: 'ResultsView' })
   } catch (error) {
